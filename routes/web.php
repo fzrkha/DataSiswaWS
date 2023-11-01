@@ -14,4 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::resource('/', SiswaController::class);
 Route::get('/', [SiswaController::class, 'index']);
+Route::get('/', [SiswaController::class, 'search'])->name('cari');
+Route::post('/', [SiswaController::class, 'store']);
+Route::delete('/{id}', [SiswaController::class, 'destroy']);
+Route::get('/{$id}', [SiswaController::class, 'edit']);
+Route::put('/{id}', [SiswaController::class, 'update']);

@@ -52,8 +52,6 @@ class SiswaController extends Controller
             ]);
         }elseif($request->hasFile('foto')) {
             $image = $request->file('foto');
-            $image->move(public_path
-            ('foto'),$image->getClientOriginalName());
 
             $simpan = Siswa::create([
                 'nis' => $request->nis,
@@ -64,6 +62,8 @@ class SiswaController extends Controller
                 'alamat_domisili' => $request->alamat,
                 'foto' => $image->getClientOriginalName()
             ]);
+
+            $image->move(public_path('foto'),$image->getClientOriginalName());
         }
 
         if($simpan){
@@ -90,7 +90,8 @@ class SiswaController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $upd = Siswa::find($id);
+        return view('siswa', compact('data'));
     }
 
     /**
@@ -98,7 +99,41 @@ class SiswaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $upd = Siswa::find($id);
+
+        if($request->foto=="") {
+            $upd->update([
+                'id' => $request->id,
+                'nama' => $request->nama,
+                'nis' => $request->nis,
+                'kelas' => $request->kelas,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'telp' => $request->telp,
+                'alamat_domisili' => $request->alamat,
+            ]);
+        } else {
+            $image = $request->file('foto');
+            $image->move(public_path('foto'), $image->getClientOriginalName());
+
+            $upd->update([
+                'id' => $request->id,
+                'nama' => $request->nama,
+                'nis' => $request->nis,
+                'kelas' => $request->kelas,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'telp' => $request->telp,
+                'alamat_domisili' => $request->alamat,
+                'foto' => $image->getClientOriginalName(),
+            ]);
+        }
+
+        if($upd) {
+            Alert::success('Ubah Data', 'Data berhasil diubah');
+            return redirect('/');
+        } else {
+            Alert::error('Ubah Data', 'Data gagal diubah');
+            return redirect('/');
+        }
     }
 
     /**
@@ -106,6 +141,23 @@ class SiswaController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $del = Siswa::find($id);
+        $del->delete();
+
+        if($del) {
+            Alert::success('Hapus Data', 'Data berhasil dihapus');
+            return redirect('/');
+        }else {
+            Alert::error('Hapus Data', 'Data gagal dihapus');
+            return redirect('/');
+        }
+    }
+
+    public function search(Request $request)
+    {
+        $keyword = $request->cari; //cari adalah name dari input
+        $data = Siswa::where('nama', 'like', "%" . $keyword . "%")->paginate(5);
+
+        return view('siswa', compact(['data']))->with('i',(request()->input('page', 1) - 1) * 5);
     }
 }
